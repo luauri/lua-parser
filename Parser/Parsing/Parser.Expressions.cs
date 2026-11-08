@@ -35,8 +35,11 @@ public partial class Parser
     {
         ExprNode left = ParseValue();
 
-        while (Peek()?.Type == Lexer.TokenType.Operator) // support more than one operator
+        while (Peek()?.Type == Lexer.TokenType.Operator) 
         {
+            if (Peek()!.Value is "+=" or "-=" or "*=" or "/=") // fixes the local var = 1 += 1 bullshit
+                throw new Exception("compound assignment requires an identifier on the left");
+
             Token op = Advance();
             ExprNode right = ParseValue();
             left = new BinaryExpressionNode(left, op.Value, right);
@@ -55,7 +58,6 @@ public partial class Parser
         {
             arguments = ParseList(ParseExpression);
         }
-
         Expect(Lexer.TokenType.Rparen);
         return new FunctionCallNode(callee, arguments);
     }

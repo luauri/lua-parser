@@ -374,6 +374,12 @@ public class ParserTests
     }
 
     [Fact]
+    public void CompoundAssignmentCannotBeUsedAsAnExpression()
+    {
+        Assert.Throws<Exception>(() => Parse("local a = 1 += 1"));
+    }
+
+    [Fact]
     public void IncompleteDeclaration()
     {
         Assert.Throws<Exception>(() => Parse("local a ="));

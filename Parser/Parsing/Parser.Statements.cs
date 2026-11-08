@@ -85,7 +85,6 @@ public partial class Parser
         }
 
         // values = ParseList(ParseExpression);
-        // FIXME: parser accepts invalid syntax like local a = 1 += 1 in repeats and whiles, and probably in more places
         return new LocalDeclaration(names, values);
     }
     private ExprNode ParseAssignment()
