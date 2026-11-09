@@ -22,8 +22,13 @@ public partial class Parser
             }
             if (token.Value == "repeat")
             {
-                Advance(); 
+                Advance();
                 return ParseRepeat();
+            }
+            if (token.Value == "return")
+            {
+                Advance();
+                return ParseReturn();
             }
             if (token.Value == "local")
             {
@@ -86,6 +91,16 @@ public partial class Parser
 
         // values = ParseList(ParseExpression);
         return new LocalDeclaration(names, values);
+    }
+    private ExprNode ParseReturn()
+    {
+        List<ExprNode> values = new();
+        if (Peek() is { } next && next.Value is not ("end" or "else" or "elseif" or "until"))
+        {
+            values = ParseList(ParseExpression); // parselist handles the commas ;)
+        }
+        return new ReturnNode(values);
+
     }
     private ExprNode ParseAssignment()
     {

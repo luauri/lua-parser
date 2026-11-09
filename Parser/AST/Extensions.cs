@@ -29,6 +29,7 @@ public static class Extensions
             FunctionDeclarationNode f => $"{(f.IsLocal ? "local " : "")}function {f.Name.ToFullString()}" + $"({string.Join(", ", f.Parameters.Select(p => p.ToFullString()))})\n" + $"{string.Join("\n", f.Body.Select(b => b.ToFullString()))}" + $"{(f.Body.Count > 0 ? "\n" : "")}end",
             FunctionCallNode f => $"{f.Function.ToFullString()}({string.Join(", ", f.Arguments.Select(a => a.ToFullString()))})", // function calls
             RepeatNode r => $"repeat\n{FormatBody(r.Body)}until {r.Condition.ToFullString()}", 
+            ReturnNode r => $"return " + (r.Values.Count > 0 ? string.Join(", ", r.Values.Select(v => v.ToFullString())) : ""),
             _ => throw new Exception("unknown node type")
         };
     }
