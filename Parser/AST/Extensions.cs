@@ -30,6 +30,7 @@ public static class Extensions
             FunctionCallNode f => $"{f.Function.ToFullString()}({string.Join(", ", f.Arguments.Select(a => a.ToFullString()))})", // function calls
             RepeatNode r => $"repeat\n{FormatBody(r.Body)}until {r.Condition.ToFullString()}", 
             ReturnNode r => $"return " + (r.Values.Count > 0 ? string.Join(", ", r.Values.Select(v => v.ToFullString())) : ""),
+            NumericForNode fn => $"for {fn.Variable.ToFullString()} = {fn.Start.ToFullString()}, {fn.End.ToFullString()}" + (fn.Step is not null ? $", {fn.Step.ToFullString()}" : "") + $" do\n" + FormatBody(fn.Body) + "end",
             _ => throw new Exception("unknown node type")
         };
     }

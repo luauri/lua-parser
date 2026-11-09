@@ -33,19 +33,41 @@ public partial class Parser
 
     private ExprNode ParseExpression()
     {
+        return ParseExpression(0);
+    }
+
+    private ExprNode ParseExpression(int minPrecedence)
+    {
         ExprNode left = ParseValue();
 
-        while (Peek()?.Type == Lexer.TokenType.Operator) 
+        while (Peek()?.Type == Lexer.TokenType.Operator)
         {
-            if (Peek()!.Value is "+=" or "-=" or "*=" or "/=") // fixes the local var = 1 += 1 bullshit
+            Token op = Peek()!;
+
+            if (op.Value is "+=" or "-=" or "*=" or "/=")
                 throw new Exception("compound assignment requires an identifier on the left");
 
-            Token op = Advance();
-            ExprNode right = ParseValue();
+            int precedence = Precendence(op.Value);
+            if (precedence < minPrecedence)
+                break;
+
+            Advance();
+            ExprNode right = ParseExpression(precedence + 1); // left to right
             left = new BinaryExpressionNode(left, op.Value, right);
         }
 
         return left;
+    }
+
+    private static int Precendence(string op)
+    {
+        return op switch
+        {
+            "==" or "<" or ">" or "<=" or ">=" => 1,
+            "+" or "-" => 2,
+            "*" or "/" => 3,
+            _ => throw new Exception("unknown operator")
+        };
     }
 
     private ExprNode ParseFunctionCall(ExprNode callee)

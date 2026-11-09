@@ -30,6 +30,11 @@ public partial class Parser
                 Advance();
                 return ParseReturn();
             }
+            if (token.Value == "for") // change this later to support forgeneric
+            {
+                Advance();
+                return ParseForNumeric();
+            }
             if (token.Value == "local")
             {
                 Advance();
@@ -100,6 +105,31 @@ public partial class Parser
             values = ParseList(ParseExpression); // parselist handles the commas ;)
         }
         return new ReturnNode(values);
+
+    }
+    private ExprNode ParseForNumeric()
+    {
+        IdentifierNode variable = ParseIdentifier(); // for 'i'
+        Expect(Lexer.TokenType.Equals);
+        ExprNode start = ParseExpression();
+        Expect(Lexer.TokenType.Comma);
+        ExprNode end = ParseExpression();
+        ExprNode? step = null;
+        if (Match(Lexer.TokenType.Comma))
+        {
+            step = ParseExpression();
+        }
+
+        ExpectKeyword("do");
+
+        List<ExprNode> body = new();
+        while (Peek() is not null && Peek()!.Value != "end")
+        {
+            body.Add(ParseStatement());
+        }
+
+        ExpectKeyword("end");
+        return new NumericForNode(variable, start, end, step, body);
 
     }
     private ExprNode ParseAssignment()
