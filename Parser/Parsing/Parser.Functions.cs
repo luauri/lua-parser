@@ -16,7 +16,6 @@ public partial class Parser
 
         if (Peek()?.Type != TokenType.Rparen)
         {
-            parameters = ParseList(ParseIdentifier);
             while (true)
             {
                 if (Match(TokenType.Vararg))
