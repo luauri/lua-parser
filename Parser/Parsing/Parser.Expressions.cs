@@ -27,6 +27,8 @@ public partial class Parser
             }
             return expression;
         }
+        if (token.Type == Lexer.TokenType.Vararg)
+            return new VarargNode();
 
         return ParseConstant(token);
     }

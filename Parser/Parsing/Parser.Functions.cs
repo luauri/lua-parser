@@ -12,9 +12,23 @@ public partial class Parser
         Expect(TokenType.Lparen);
 
         List<IdentifierNode> parameters = new();
+        bool Isvararg = false;
+
         if (Peek()?.Type != TokenType.Rparen)
         {
             parameters = ParseList(ParseIdentifier);
+            while (true)
+            {
+                if (Match(TokenType.Vararg))
+                {
+                    Isvararg = true;
+                    break;
+                }
+
+                parameters.Add(ParseIdentifier());
+                if (!Match(TokenType.Comma))
+                    break;
+            }
         }
         Expect(TokenType.Rparen); // closing paren
         List<ExprNode> body = new(); // function body
@@ -28,6 +42,6 @@ public partial class Parser
             throw new Exception("Expected 'end' after function");
 
         Advance();
-        return new FunctionDeclarationNode(name, parameters, body, isLocal);
+        return new FunctionDeclarationNode(name, parameters, body, isLocal, Isvararg);
     }
 }

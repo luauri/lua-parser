@@ -26,11 +26,12 @@ public static class Extensions
             BinaryExpressionNode b => $"{b.Left.ToFullString()} {b.Operator} {b.Right.ToFullString()}",
             AssignmentNode a => $"{a.Name.ToFullString()} = {a.Value.ToFullString()}",
             CompoundAssignmentNode c => $"{c.Name.ToFullString()} {c.Operator} {c.Value.ToFullString()}", // compound operators!!!!!
-            FunctionDeclarationNode f => $"{(f.IsLocal ? "local " : "")}function {f.Name.ToFullString()}" + $"({string.Join(", ", f.Parameters.Select(p => p.ToFullString()))})\n" + $"{string.Join("\n", f.Body.Select(b => b.ToFullString()))}" + $"{(f.Body.Count > 0 ? "\n" : "")}end",
+            FunctionDeclarationNode f => $"{(f.IsLocal ? "local " : "")}function {f.Name.ToFullString()}({string.Join(", ", f.Parameters.Select(p => p.ToFullString()).Concat(f.Isvararg ? new[] { "..." } : Array.Empty<string>()))})\n" + FormatBody(f.Body) + "end",  // made it support vararg for the param, and i am now using formatbody on the body
             FunctionCallNode f => $"{f.Function.ToFullString()}({string.Join(", ", f.Arguments.Select(a => a.ToFullString()))})", // function calls
             RepeatNode r => $"repeat\n{FormatBody(r.Body)}until {r.Condition.ToFullString()}", 
             ReturnNode r => $"return " + (r.Values.Count > 0 ? string.Join(", ", r.Values.Select(v => v.ToFullString())) : ""),
             NumericForNode fn => $"for {fn.Variable.ToFullString()} = {fn.Start.ToFullString()}, {fn.End.ToFullString()}" + (fn.Step is not null ? $", {fn.Step.ToFullString()}" : "") + $" do\n" + FormatBody(fn.Body) + "end",
+            VarargNode _ => "...",
             _ => throw new Exception("unknown node type")
         };
     }

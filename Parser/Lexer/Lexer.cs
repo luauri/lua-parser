@@ -1,4 +1,5 @@
 using System;
+using Parser;
 
 namespace Parser;
 
@@ -17,10 +18,16 @@ public partial class Lexer
         Operator,
         Rparen,
         Lparen,
+        Vararg,
         // Semicolon
     }
 
     public record Token(TokenType Type, string Value);
+
+    private static bool Match(string input, int index, string text) //  🤤 
+    {
+        return input.AsSpan(index).StartsWith(text, StringComparison.Ordinal);
+    }
 
     public List<Token> Tokenize(string input)
     {
@@ -36,7 +43,7 @@ public partial class Lexer
                 i++; // skip whitespace
                 continue;
             }
-            if (c == '-' && i + 1 < input.Length && input[i + 1] == '-') // TODO: make this more lossless
+            if (Match(input, i, "--")) // TODO: make this more lossless
             {
                 Comment(input, ref i);
                 continue;
@@ -44,7 +51,7 @@ public partial class Lexer
 
             if (c == '=')
             {
-                if (i + 1 < input.Length && input[i + 1] == '=')
+                if (Match(input, i, "=="))
                 {
                     tokens.Add(new Token(TokenType.Operator, "=="));
                     i += 2;
@@ -90,13 +97,13 @@ public partial class Lexer
 
             if (c == ',')
             {
-                tokens.Add(new Token(TokenType.Comma, ",")); // still no support for multiple local decl on same line
+                tokens.Add(new Token(TokenType.Comma, ",")); 
                 i++;
                 continue;
             }
             if (c == '>')
             {
-                if (i + 1 < input.Length && input[i + 1] == '=')  // check if it's >= instead of >
+                if (Match(input, i, ">="))  // check if it's >= instead of >
                 {
                     tokens.Add(new Token(TokenType.Operator, ">="));
                     i += 2;
@@ -108,7 +115,7 @@ public partial class Lexer
             }
             if (c == '<')
             {
-                if (i + 1 < input.Length && input[i + 1] == '=')
+                if (Match(input, i, "<="))
                 {
                     tokens.Add(new Token(TokenType.Operator, "<="));
                     i += 2;
@@ -122,6 +129,12 @@ public partial class Lexer
             if (c is '+' or '-' or '*' or '/') 
             {
                 Operators(input, ref i, tokens);
+                continue;
+            }
+            if (Match(input, i, "..."))
+            {
+                tokens.Add(new Token(TokenType.Vararg, "..."));
+                i += 3;
                 continue;
             }
             throw new Exception($"unexpected character: {c}");
