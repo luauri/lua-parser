@@ -5,5 +5,5 @@ public record FunctionDeclarationNode(
     List<IdentifierNode> Parameters,
     List<ExprNode> Body,
     bool IsLocal,
-    bool Isvararg // i couldve made seperate nodes for (local, global) but this is simpler 
+    bool Isvararg 
 ) : ExprNode;

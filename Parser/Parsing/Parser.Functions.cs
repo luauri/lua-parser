@@ -5,6 +5,40 @@ namespace Parser;
 
 public partial class Parser
 {
+    private ExprNode ParseFunctionExpression()
+    {
+        Expect(TokenType.Lparen); // function(
+
+        List<IdentifierNode> parameters = new();
+        bool isVararg = false;
+
+        if (Peek()?.Type != TokenType.Rparen)
+        {
+            while (true)
+            {
+                if (Match(TokenType.Vararg))
+                {
+                    isVararg = true;
+                    break;
+                }
+
+                parameters.Add(ParseIdentifier());
+                if (!Match(TokenType.Comma))
+                    break;
+            }
+        }
+
+        Expect(TokenType.Rparen); // function ()
+
+        List<ExprNode> body = new();
+        while (Peek() is not null && Peek()!.Value != "end")
+        {
+            body.Add(ParseStatement());
+        }
+
+        ExpectKeyword("end");
+        return new FunctionExpressionNode(parameters, body, isVararg);
+    }
     private ExprNode ParseFunction(bool isLocal)
     {
         IdentifierNode name = ParseIdentifier(); // function name

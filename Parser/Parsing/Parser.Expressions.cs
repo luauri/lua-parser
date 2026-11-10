@@ -30,6 +30,8 @@ public partial class Parser
         if (token.Type == Lexer.TokenType.Vararg)
             return new VarargNode();
 
+            if(token.Type == Lexer.TokenType.Keyword && token.Value == "function")
+                return ParseFunctionExpression();
         return ParseConstant(token);
     }
 
