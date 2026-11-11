@@ -33,7 +33,7 @@ public partial class Parser
             if (token.Value == "for") // change this later to support forgeneric
             {
                 Advance();
-                return ParseForNumeric();
+                return ParseFor();
             }
             if (token.Value == "local")
             {
@@ -97,6 +97,40 @@ public partial class Parser
         // values = ParseList(ParseExpression);
         return new LocalDeclaration(names, values);
     }
+    private ExprNode ParseFor()
+    {
+        IdentifierNode variable = ParseIdentifier();
+
+        if (Peek()?.Type == Lexer.TokenType.Equals)
+            return ParseForNumeric(variable);
+
+        if (Peek()?.Type == Lexer.TokenType.Comma || Peek()?.Value == "in")
+            return ParseForGeneric(variable);
+
+        throw new Exception("expected '=' or 'in' in for loop");
+    }
+    private ExprNode ParseForGeneric(IdentifierNode variable)
+    {
+        List<IdentifierNode> variables = new() { variable };
+        while (Match(Lexer.TokenType.Comma))
+        {
+            variables.Add(ParseIdentifier());
+        }
+
+        ExpectKeyword("in");
+        List<ExprNode> iterators = ParseList(ParseExpression);
+
+        ExpectKeyword("do");
+
+        List<ExprNode> body = new();
+        while (Peek() is not null && Peek()!.Value != "end")
+        {
+            body.Add(ParseStatement());
+        }
+
+        ExpectKeyword("end");
+        return new GenericForNode(variables, iterators, body);
+    }
     private ExprNode ParseReturn()
     {
         List<ExprNode> values = new();
@@ -107,9 +141,8 @@ public partial class Parser
         return new ReturnNode(values);
 
     }
-    private ExprNode ParseForNumeric()
+    private ExprNode ParseForNumeric(IdentifierNode variable)
     {
-        IdentifierNode variable = ParseIdentifier(); // for 'i'
         Expect(Lexer.TokenType.Equals);
         ExprNode start = ParseExpression();
         Expect(Lexer.TokenType.Comma);

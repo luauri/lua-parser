@@ -33,6 +33,7 @@ public static class Extensions
             NumericForNode fn => $"for {fn.Variable.ToFullString()} = {fn.Start.ToFullString()}, {fn.End.ToFullString()}" + (fn.Step is not null ? $", {fn.Step.ToFullString()}" : "") + $" do\n" + FormatBody(fn.Body) + "end",
             VarargNode _ => "...",
             FunctionExpressionNode f => $"function({string.Join(", ", f.Parameters.Select(p => p.ToFullString()).Concat(f.Isvararg ? new[] { "..." } : Array.Empty<string>()))})\n" + FormatBody(f.Body) + "end",
+            GenericForNode gn => $"for {string.Join(", ", gn.Variables.Select(v => v.ToFullString()))} in {string.Join(", ", gn.Iterator.Select(i => i.ToFullString()))} do\n" + FormatBody(gn.Body) + "end",
             _ => throw new Exception("unknown node type")
         };
     }
